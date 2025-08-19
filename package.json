@@ -1,0 +1,39 @@
+{
+  "name": "global-ai-information-platform",
+  "version": "0.1.0",
+  "description": "全球軟體資訊平台爬蟲與資料庫系統",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "crawl": "node src/index.js",
+    "crawl:github": "node src/index.js github",
+    "test": "jest",
+    "lint": "eslint src/**/*.js"
+  },
+  "keywords": [
+    "crawler",
+    "information-platform",
+    "supabase",
+    "github-api"
+  ],
+  "author": "SoftHub Team",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.4",
+    "axios": "^1.6.2",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.3.1",
+    "joi": "^17.11.0",
+    "node-fetch": "^3.3.2",
+    "playwright": "^1.40.0",
+    "puppeteer": "^21.5.2",
+    "winston": "^3.11.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1"
+  }
+}

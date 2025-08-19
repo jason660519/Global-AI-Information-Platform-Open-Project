@@ -1,0 +1,40 @@
+name: Crawler Automation
+
+on:
+  schedule:
+    # 每6小時執行一次
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    # 允許手動觸發
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run GitHub crawler
+        run: npm run crawl:github
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
+      
+      - name: Archive logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: crawler-logs
+          path: logs/
+          retention-days: 7

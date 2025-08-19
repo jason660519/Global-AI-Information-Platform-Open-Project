@@ -35,19 +35,16 @@ function createLogger(category = 'app') {
     transports: [
       // 控制台輸出
       new winston.transports.Console({
-        format: winston.format.combine(
-          winston.format.colorize(),
-          winston.format.simple()
-        )
+        format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
       }),
       // 文件輸出
       new winston.transports.File({
         filename: config.logger.filePath,
         maxsize: 5242880, // 5MB
         maxFiles: 5,
-        tailable: true
-      })
-    ]
+        tailable: true,
+      }),
+    ],
   });
 }
 

@@ -12,7 +12,7 @@ class BaseCrawler {
     if (new.target === BaseCrawler) {
       throw new Error('BaseCrawler是抽象類，不能直接實例化');
     }
-    
+
     this.config = config;
     this.logger = logger;
     this.retryCount = 0;
@@ -26,19 +26,19 @@ class BaseCrawler {
   async execute() {
     try {
       this.logger.info(`開始執行爬蟲任務: ${this.constructor.name}`);
-      
+
       // 爬取原始數據
       const rawData = await this.crawl();
-      
+
       // 處理數據
       const processedData = await this.process(rawData);
-      
+
       // 驗證數據
       const validData = await this.validate(processedData);
-      
+
       // 儲存數據
       await this.save(validData);
-      
+
       this.logger.info(`爬蟲任務完成: ${this.constructor.name}`);
     } catch (error) {
       await this.handleError(error);
@@ -88,22 +88,22 @@ class BaseCrawler {
   async handleError(error) {
     this.logger.error(`爬蟲執行錯誤: ${error.message}`, {
       crawler: this.constructor.name,
-      stack: error.stack
+      stack: error.stack,
     });
-    
+
     // 實現重試邏輯
     if (this.retryCount < this.maxRetries) {
       this.retryCount++;
       const delay = this.config.crawler.retryDelay * Math.pow(2, this.retryCount - 1);
-      
+
       this.logger.info(`嘗試重試 (${this.retryCount}/${this.maxRetries}) 在 ${delay}ms 後`);
-      
+
       await new Promise(resolve => setTimeout(resolve, delay));
       return this.execute();
     }
-    
+
     this.logger.error(`爬蟲任務失敗，已達到最大重試次數: ${this.maxRetries}`);
   }
 }
 
-module.exports = BaseCrawler;
+export default BaseCrawler;

@@ -1,13 +1,14 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
-module.exports = {
+const config = {
   // Supabase配置
   supabase: {
     url: process.env.SUPABASE_URL,
     key: process.env.SUPABASE_KEY,
     storage: {
       rawDataBucket: 'raw-data',
-      processingBucket: 'processing-data'
+      processingBucket: 'processing-data',
     },
     tables: {
       repositories: 'repositories',
@@ -15,10 +16,10 @@ module.exports = {
       resources: 'learning_resources',
       rankings: 'rankings',
       videos: 'videos',
-      crawlerLogs: 'crawler_logs'
-    }
+      crawlerLogs: 'crawler_logs',
+    },
   },
-  
+
   // 爬蟲配置
   crawler: {
     userAgent: process.env.CRAWLER_USER_AGENT || 'SoftHubBot/1.0',
@@ -28,25 +29,38 @@ module.exports = {
     concurrency: 5, // 並發爬蟲數量
     rateLimits: {
       github: {
-        requestsPerHour: 5000 // GitHub API 認證用戶的限制
-      }
-    }
+        requestsPerHour: 5000, // GitHub API 認證用戶的限制
+      },
+    },
   },
-  
+
   // 日誌配置
   logger: {
     level: process.env.LOG_LEVEL || 'info',
-    filePath: process.env.LOG_FILE_PATH || 'logs/crawler.log'
+    filePath: process.env.LOG_FILE_PATH || 'logs/crawler.log',
   },
-  
+
   // 資料來源配置
   sources: {
     github: {
       apiBaseUrl: 'https://api.github.com',
       token: process.env.GITHUB_TOKEN,
       crawlFrequency: '0 */6 * * *', // 每6小時執行一次 (cron格式)
-      topics: ['javascript', 'typescript', 'python', 'java', 'go', 'rust', 'cpp', 'csharp', 'php', 'ruby']
+      topics: [
+        'javascript',
+        'typescript',
+        'python',
+        'java',
+        'go',
+        'rust',
+        'cpp',
+        'csharp',
+        'php',
+        'ruby',
+      ],
     },
     // 其他資料來源配置可以在這裡添加
-  }
+  },
 };
+
+export default config;

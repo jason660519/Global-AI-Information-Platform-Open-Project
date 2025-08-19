@@ -14,7 +14,7 @@ const articleSchema = z.object({
   category: z.string().optional(),
   language: z.string().optional(),
   content_hash: z.string().optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.any()).optional(),
 });
 
 /**
@@ -33,16 +33,19 @@ const repositorySchema = z.object({
   owner: z.object({
     login: z.string(),
     type: z.string(),
-    url: z.string().url({ message: '擁有者URL格式不正確' })
+    url: z.string().url({ message: '擁有者URL格式不正確' }),
   }),
   created_at: z.string().datetime({ message: '創建時間格式不正確' }),
   updated_at: z.string().datetime({ message: '更新時間格式不正確' }),
-  license: z.object({
-    key: z.string(),
-    name: z.string(),
-    url: z.string().url().nullable()
-  }).optional().nullable(),
-  metadata: z.record(z.any()).optional()
+  license: z
+    .object({
+      key: z.string(),
+      name: z.string(),
+      url: z.string().url().nullable(),
+    })
+    .optional()
+    .nullable(),
+  metadata: z.record(z.any()).optional(),
 });
 
 /**
@@ -59,7 +62,7 @@ const learningResourceSchema = z.object({
   author: z.string().optional(),
   published_at: z.string().datetime({ message: '發布時間格式不正確' }).optional(),
   rating: z.number().min(0).max(5).optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.any()).optional(),
 });
 
 /**
@@ -75,7 +78,7 @@ const rankingSchema = z.object({
   date: z.string().datetime({ message: '日期格式不正確' }),
   previous_rank: z.number().int().positive().optional(),
   change: z.number().int().optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.any()).optional(),
 });
 
 /**
@@ -86,7 +89,7 @@ const crawlerLogSchema = z.object({
   status: z.enum(['success', 'error', 'warning', 'info']),
   message: z.string(),
   details: z.record(z.any()).optional(),
-  created_at: z.string().datetime({ message: '創建時間格式不正確' })
+  created_at: z.string().datetime({ message: '創建時間格式不正確' }),
 });
 
 module.exports = {
@@ -94,5 +97,5 @@ module.exports = {
   repositorySchema,
   learningResourceSchema,
   rankingSchema,
-  crawlerLogSchema
+  crawlerLogSchema,
 };

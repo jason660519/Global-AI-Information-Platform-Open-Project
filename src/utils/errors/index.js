@@ -9,7 +9,7 @@ const ErrorType = {
   VALIDATION_ERROR: 'VALIDATION_ERROR',
   RATE_LIMIT_ERROR: 'RATE_LIMIT_ERROR',
   DATABASE_ERROR: 'DATABASE_ERROR',
-  UNKNOWN_ERROR: 'UNKNOWN_ERROR'
+  UNKNOWN_ERROR: 'UNKNOWN_ERROR',
 };
 
 /**
@@ -29,7 +29,7 @@ class CrawlerError extends Error {
     this.type = type;
     this.originalError = originalError;
     this.timestamp = new Date();
-    
+
     // 保留原始錯誤的堆疊跟踪
     if (originalError && originalError.stack) {
       this.stack = `${this.stack}\nCaused by: ${originalError.stack}`;
@@ -52,28 +52,28 @@ class ErrorClassifier {
     if (error instanceof CrawlerError) {
       return error.type;
     }
-    
+
     // Axios錯誤
     if (error.isAxiosError) {
       if (!error.response) {
         return ErrorType.NETWORK_ERROR;
       }
-      
+
       const status = error.response.status;
-      
+
       if (status === 429) {
         return ErrorType.RATE_LIMIT_ERROR;
       }
-      
+
       if (status >= 400 && status < 500) {
         return ErrorType.HTTP_ERROR;
       }
-      
+
       if (status >= 500) {
         return ErrorType.NETWORK_ERROR;
       }
     }
-    
+
     // 網絡錯誤
     if (
       error.code === 'ECONNRESET' ||
@@ -83,7 +83,7 @@ class ErrorClassifier {
     ) {
       return ErrorType.NETWORK_ERROR;
     }
-    
+
     // 解析錯誤
     if (
       error.name === 'SyntaxError' ||
@@ -92,23 +92,20 @@ class ErrorClassifier {
     ) {
       return ErrorType.PARSE_ERROR;
     }
-    
+
     // 驗證錯誤
-    if (
-      error.name === 'ValidationError' ||
-      error.name === 'ZodError'
-    ) {
+    if (error.name === 'ValidationError' || error.name === 'ZodError') {
       return ErrorType.VALIDATION_ERROR;
     }
-    
+
     // 資料庫錯誤
     if (error.message.includes('database') || error.message.includes('supabase')) {
       return ErrorType.DATABASE_ERROR;
     }
-    
+
     return ErrorType.UNKNOWN_ERROR;
   }
-  
+
   /**
    * 創建標準化的爬蟲錯誤
    * @param {Error} error - 原始錯誤
@@ -118,13 +115,9 @@ class ErrorClassifier {
   static createCrawlerError(error, customMessage = '') {
     const type = this.classify(error);
     const message = customMessage || error.message;
-    
+
     return new CrawlerError(message, type, error);
   }
 }
 
-module.exports = {
-  ErrorType,
-  CrawlerError,
-  ErrorClassifier
-};
+export { ErrorType, CrawlerError, ErrorClassifier };

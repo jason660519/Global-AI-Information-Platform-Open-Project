@@ -1,9 +1,7 @@
-const { createClient } = require('@supabase/supabase-js');
-const config = require('../config');
-const createLogger = require('../utils/logger');
-const { CrawlerError, ErrorType } = require('../utils/errors');
-
-const logger = createLogger('supabase');
+import { createClient } from '@supabase/supabase-js';
+import config from '../config/index.js';
+import logger from '../utils/logger.js';
+import { CrawlerError, ErrorType } from '../utils/errors/index.js';
 
 /**
  * Supabase客戶端類
@@ -15,16 +13,13 @@ class SupabaseClient {
    */
   constructor() {
     if (!config.supabase.url || !config.supabase.key) {
-      throw new CrawlerError(
-        'Supabase URL和Key必須在環境變數中設置',
-        ErrorType.DATABASE_ERROR
-      );
+      throw new CrawlerError('Supabase URL和Key必須在環境變數中設置', ErrorType.DATABASE_ERROR);
     }
-    
+
     this.client = createClient(config.supabase.url, config.supabase.key);
     this.tables = config.supabase.tables;
     this.storage = config.supabase.storage;
-    
+
     logger.info('Supabase客戶端初始化完成');
   }
 
@@ -46,17 +41,15 @@ class SupabaseClient {
   async insert(table, data, options = {}) {
     try {
       const { upsert = false } = options;
-      
-      const query = this.client
-        .from(table)
-        .insert(data, { returning: 'minimal', ...options });
-      
+
+      const query = this.client.from(table).insert(data, { returning: 'minimal', ...options });
+
       if (upsert) {
         query.upsert();
       }
-      
+
       const { error } = await query;
-      
+
       if (error) {
         throw new CrawlerError(
           `插入數據到表 ${table} 失敗: ${error.message}`,
@@ -64,10 +57,10 @@ class SupabaseClient {
           error
         );
       }
-      
+
       const count = Array.isArray(data) ? data.length : 1;
       logger.info(`成功插入 ${count} 條數據到表 ${table}`);
-      
+
       return { success: true, count };
     } catch (error) {
       if (!(error instanceof CrawlerError)) {
@@ -77,7 +70,7 @@ class SupabaseClient {
           error
         );
       }
-      
+
       logger.error(error.message, { stack: error.stack });
       throw error;
     }
@@ -93,16 +86,15 @@ class SupabaseClient {
   async uploadRawData(path, data, options = {}) {
     try {
       const { contentType = 'application/json' } = options;
-      
-      const { error } = await this.client
-        .storage
+
+      const { error } = await this.client.storage
         .from(this.storage.rawDataBucket)
         .upload(path, data, {
           contentType,
           upsert: true,
-          ...options
+          ...options,
         });
-      
+
       if (error) {
         throw new CrawlerError(
           `上傳原始數據到 ${path} 失敗: ${error.message}`,
@@ -110,13 +102,13 @@ class SupabaseClient {
           error
         );
       }
-      
+
       logger.info(`成功上傳原始數據到 ${path}`);
-      
+
       return {
         success: true,
         path,
-        url: this.client.storage.from(this.storage.rawDataBucket).getPublicUrl(path).data.publicUrl
+        url: this.client.storage.from(this.storage.rawDataBucket).getPublicUrl(path).data.publicUrl,
       };
     } catch (error) {
       if (!(error instanceof CrawlerError)) {
@@ -126,7 +118,7 @@ class SupabaseClient {
           error
         );
       }
-      
+
       logger.error(error.message, { stack: error.stack });
       throw error;
     }
@@ -143,9 +135,9 @@ class SupabaseClient {
       status: logData.status,
       message: logData.message,
       details: logData.details || {},
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
-    
+
     return this.insert(this.tables.crawlerLogs, log);
   }
 
@@ -158,14 +150,14 @@ class SupabaseClient {
   async exists(table, conditions) {
     try {
       let query = this.client.from(table).select('id', { count: 'exact' });
-      
+
       // 添加所有條件
       Object.entries(conditions).forEach(([key, value]) => {
         query = query.eq(key, value);
       });
-      
+
       const { count, error } = await query;
-      
+
       if (error) {
         throw new CrawlerError(
           `檢查表 ${table} 中數據是否存在時發生錯誤: ${error.message}`,
@@ -173,7 +165,7 @@ class SupabaseClient {
           error
         );
       }
-      
+
       return count > 0;
     } catch (error) {
       if (!(error instanceof CrawlerError)) {
@@ -183,7 +175,7 @@ class SupabaseClient {
           error
         );
       }
-      
+
       logger.error(error.message, { stack: error.stack });
       throw error;
     }
@@ -204,6 +196,5 @@ function getSupabaseClient() {
   return instance;
 }
 
-module.exports = {
-  getSupabaseClient
-};
+export { getSupabaseClient };
+export default getSupabaseClient();

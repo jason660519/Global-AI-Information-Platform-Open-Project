@@ -1,5 +1,5 @@
-const axios = require('axios');
-const BaseCrawler = require('./base-crawler');
+import axios from 'axios';
+import BaseCrawler from './base-crawler.js';
 
 /**
  * API爬蟲引擎
@@ -17,19 +17,19 @@ class APICrawler extends BaseCrawler {
    */
   constructor(config, logger, options = {}) {
     super(config, logger);
-    
+
     this.baseUrl = options.baseUrl || '';
     this.headers = options.headers || {};
     this.params = options.params || {};
-    
+
     // 設置axios實例
     this.client = axios.create({
       baseURL: this.baseUrl,
       headers: {
         'User-Agent': config.crawler.userAgent,
-        ...this.headers
+        ...this.headers,
       },
-      timeout: config.crawler.timeout
+      timeout: config.crawler.timeout,
     });
   }
 
@@ -42,9 +42,9 @@ class APICrawler extends BaseCrawler {
   async get(endpoint, params = {}) {
     try {
       const response = await this.client.get(endpoint, {
-        params: { ...this.params, ...params }
+        params: { ...this.params, ...params },
       });
-      
+
       return response.data;
     } catch (error) {
       this.handleRequestError(error, 'GET', endpoint);
@@ -62,9 +62,9 @@ class APICrawler extends BaseCrawler {
   async post(endpoint, data = {}, params = {}) {
     try {
       const response = await this.client.post(endpoint, data, {
-        params: { ...this.params, ...params }
+        params: { ...this.params, ...params },
       });
-      
+
       return response.data;
     } catch (error) {
       this.handleRequestError(error, 'POST', endpoint);
@@ -83,12 +83,12 @@ class APICrawler extends BaseCrawler {
       // 服務器回應了錯誤狀態碼
       this.logger.error(`API請求錯誤: ${method} ${endpoint} - 狀態碼: ${error.response.status}`, {
         data: error.response.data,
-        headers: error.response.headers
+        headers: error.response.headers,
       });
     } else if (error.request) {
       // 請求已發送但沒有收到回應
       this.logger.error(`API請求無回應: ${method} ${endpoint}`, {
-        request: error.request
+        request: error.request,
       });
     } else {
       // 設置請求時發生錯誤
@@ -115,21 +115,21 @@ class APICrawler extends BaseCrawler {
   getRetryAfter(response) {
     // 檢查常見的重試標頭
     const retryAfter = response.headers['retry-after'] || response.headers['x-ratelimit-reset'];
-    
+
     if (retryAfter) {
       // 如果是時間戳，計算等待時間
       if (retryAfter.length > 5) {
         const resetTime = new Date(parseInt(retryAfter, 10) * 1000);
         return Math.max(0, resetTime - new Date());
       }
-      
+
       // 如果是秒數，轉換為毫秒
       return parseInt(retryAfter, 10) * 1000;
     }
-    
+
     // 默認等待時間
     return 60000; // 1分鐘
   }
 }
 
-module.exports = APICrawler;
+export default APICrawler;

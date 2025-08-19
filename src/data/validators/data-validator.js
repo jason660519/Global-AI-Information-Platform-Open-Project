@@ -1,8 +1,6 @@
-const schemas = require('./schema');
-const { CrawlerError, ErrorType } = require('../../utils/errors');
-const createLogger = require('../../utils/logger');
-
-const logger = createLogger('validator');
+import { CrawlerError, ErrorType } from '../../utils/errors/index.js';
+import logger from '../../utils/logger.js';
+import { validateRepositoryData } from './repository-validator.js';
 
 /**
  * 數據驗證器類
@@ -18,7 +16,7 @@ class DataValidator {
   static validateArticle(article) {
     try {
       const result = schemas.articleSchema.safeParse(article);
-      
+
       if (!result.success) {
         const errorMessage = this._formatZodError(result.error);
         throw new CrawlerError(
@@ -27,7 +25,7 @@ class DataValidator {
           result.error
         );
       }
-      
+
       logger.debug('文章數據驗證成功');
       return result.data;
     } catch (error) {
@@ -38,7 +36,7 @@ class DataValidator {
           error
         );
       }
-      
+
       logger.error(error.message);
       throw error;
     }
@@ -53,7 +51,7 @@ class DataValidator {
   static validateRepository(repository) {
     try {
       const result = schemas.repositorySchema.safeParse(repository);
-      
+
       if (!result.success) {
         const errorMessage = this._formatZodError(result.error);
         throw new CrawlerError(
@@ -62,7 +60,7 @@ class DataValidator {
           result.error
         );
       }
-      
+
       logger.debug('開源項目數據驗證成功');
       return result.data;
     } catch (error) {
@@ -73,7 +71,7 @@ class DataValidator {
           error
         );
       }
-      
+
       logger.error(error.message);
       throw error;
     }
@@ -88,7 +86,7 @@ class DataValidator {
   static validateLearningResource(resource) {
     try {
       const result = schemas.learningResourceSchema.safeParse(resource);
-      
+
       if (!result.success) {
         const errorMessage = this._formatZodError(result.error);
         throw new CrawlerError(
@@ -97,7 +95,7 @@ class DataValidator {
           result.error
         );
       }
-      
+
       logger.debug('學習資源數據驗證成功');
       return result.data;
     } catch (error) {
@@ -108,7 +106,7 @@ class DataValidator {
           error
         );
       }
-      
+
       logger.error(error.message);
       throw error;
     }
@@ -123,7 +121,7 @@ class DataValidator {
   static validateRanking(ranking) {
     try {
       const result = schemas.rankingSchema.safeParse(ranking);
-      
+
       if (!result.success) {
         const errorMessage = this._formatZodError(result.error);
         throw new CrawlerError(
@@ -132,7 +130,7 @@ class DataValidator {
           result.error
         );
       }
-      
+
       logger.debug('排名數據驗證成功');
       return result.data;
     } catch (error) {
@@ -143,7 +141,7 @@ class DataValidator {
           error
         );
       }
-      
+
       logger.error(error.message);
       throw error;
     }
@@ -158,7 +156,7 @@ class DataValidator {
   static validateCrawlerLog(log) {
     try {
       const result = schemas.crawlerLogSchema.safeParse(log);
-      
+
       if (!result.success) {
         const errorMessage = this._formatZodError(result.error);
         throw new CrawlerError(
@@ -167,7 +165,7 @@ class DataValidator {
           result.error
         );
       }
-      
+
       return result.data;
     } catch (error) {
       if (!(error instanceof CrawlerError)) {
@@ -177,7 +175,7 @@ class DataValidator {
           error
         );
       }
-      
+
       logger.error(error.message);
       throw error;
     }
@@ -193,12 +191,17 @@ class DataValidator {
     if (!error || !error.errors) {
       return '未知驗證錯誤';
     }
-    
-    return error.errors.map(err => {
-      const path = err.path.join('.');
-      return `${path}: ${err.message}`;
-    }).join('; ');
+
+    return error.errors
+      .map(err => {
+        const path = err.path.join('.');
+        return `${path}: ${err.message}`;
+      })
+      .join('; ');
   }
 }
 
-module.exports = DataValidator;
+export default DataValidator;
+
+// 為了向後兼容，導出repository驗證函數
+export { validateRepositoryData };

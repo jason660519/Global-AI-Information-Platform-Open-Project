@@ -12,6 +12,8 @@
     "dev": "nodemon src/index.js",
     "crawl": "node src/crawlers/index.js",
     "crawl:github": "node src/crawlers/sources/github-crawler.js",
+    "crawl:actions": "node src/index.js",
+    "test:actions": "node test-github-actions.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

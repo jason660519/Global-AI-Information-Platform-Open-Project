@@ -27,9 +27,11 @@ const config = {
     maxRetries: parseInt(process.env.CRAWLER_MAX_RETRIES || '3', 10),
     retryDelay: 1000, // 重試延遲的基本毫秒數
     concurrency: 5, // 並發爬蟲數量
+    maxRequests: parseInt(process.env.MAX_REQUESTS || '4500', 10), // 每次執行的最大請求數
     rateLimits: {
       github: {
         requestsPerHour: 5000, // GitHub API 認證用戶的限制
+        requestsPerExecution: parseInt(process.env.MAX_REQUESTS || '4500', 10), // 每次執行限制
       },
     },
   },
@@ -45,7 +47,7 @@ const config = {
     github: {
       apiBaseUrl: 'https://api.github.com',
       token: process.env.GITHUB_TOKEN,
-      crawlFrequency: '0 */6 * * *', // 每6小時執行一次 (cron格式)
+      crawlFrequency: '0 */2 * * *', // 每2小時執行一次 (cron格式)
       topics: [
         'javascript',
         'typescript',

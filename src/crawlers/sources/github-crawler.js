@@ -33,8 +33,10 @@ class GitHubCrawler extends APICrawler {
     this.rateLimitReset = null;
     this.csvExporter = new CSVExporter();
     this.supabaseUploader = new SupabaseUploader();
+    this.requestCount = 0; // 請求計數器
+    this.maxRequests = config.crawler.maxRequests; // 最大請求數限制
 
-    logger.info('GitHub爬蟲初始化完成');
+    logger.info(`GitHub爬蟲初始化完成，最大請求數: ${this.maxRequests}`);
   }
 
   /**
@@ -86,6 +88,12 @@ class GitHubCrawler extends APICrawler {
    */
   async searchRepositories(query, maxResults = 100) {
     try {
+      // 檢查是否超過請求限制
+      if (this.requestCount >= this.maxRequests) {
+        logger.warn(`已達到最大請求數限制 (${this.maxRequests})，停止搜索`);
+        return [];
+      }
+
       const params = new URLSearchParams({
         q: query,
         sort: 'stars',
@@ -93,6 +101,9 @@ class GitHubCrawler extends APICrawler {
         per_page: Math.min(maxResults, 100),
       });
 
+      this.requestCount++; // 增加請求計數
+      logger.info(`執行搜索請求 (${this.requestCount}/${this.maxRequests}): ${query}`);
+      
       const response = await this.get(`/search/repositories?${params.toString()}`);
 
       return response.items || [];
@@ -329,17 +340,29 @@ class GitHubCrawler extends APICrawler {
    */
   async crawlAllTopics() {
     const results = {};
+    let processedTopics = 0;
 
     for (const topic of this.topics) {
+      // 檢查是否超過請求限制
+      if (this.requestCount >= this.maxRequests) {
+        logger.warn(`已達到最大請求數限制 (${this.maxRequests})，停止爬取主題`);
+        break;
+      }
+
       try {
+        logger.info(`開始爬取主題: ${topic} (${processedTopics + 1}/${this.topics.length})`);
         const repositories = await this.crawlRepositoriesByTopic(topic, { limit: 20 });
         results[topic] = repositories;
+        processedTopics++;
+        
+        logger.info(`完成主題 ${topic}，獲得 ${repositories.length} 個倉庫`);
       } catch (error) {
         logger.error(`爬取主題 ${topic} 時發生錯誤: ${error.message}`);
         results[topic] = [];
       }
     }
 
+    logger.info(`總共處理了 ${processedTopics}/${this.topics.length} 個主題，使用了 ${this.requestCount}/${this.maxRequests} 個請求`);
     return results;
   }
 
@@ -350,32 +373,144 @@ class GitHubCrawler extends APICrawler {
    */
   async processRepository(repository) {
     try {
-      // 提取需要的字段
+      // 提取所有可用的字段
       const processedRepo = {
+        // 基本信息
+        id: repository.id,
+        node_id: repository.node_id,
         name: repository.name,
         full_name: repository.full_name,
         description: repository.description,
         url: repository.html_url,
         homepage: repository.homepage,
+        clone_url: repository.clone_url,
+        git_url: repository.git_url,
+        ssh_url: repository.ssh_url,
+        svn_url: repository.svn_url,
+        mirror_url: repository.mirror_url,
+        
+        // 統計數據
         stars: repository.stargazers_count,
         forks: repository.forks_count,
+        watchers: repository.watchers_count,
+        subscribers_count: repository.subscribers_count,
+        network_count: repository.network_count,
+        open_issues: repository.open_issues_count,
+        size: repository.size,
+        
+        // 技術信息
         language: repository.language,
         topics: repository.topics || [],
-        owner: {
-          login: repository.owner.login,
-          type: repository.owner.type,
-          url: repository.owner.html_url,
-        },
+        default_branch: repository.default_branch,
+        
+        // 時間信息
         created_at: repository.created_at,
         updated_at: repository.updated_at,
-        license: repository.license,
-        metadata: {
-          api_url: repository.url,
-          open_issues: repository.open_issues_count,
-          watchers: repository.watchers_count,
-          default_branch: repository.default_branch,
-          is_fork: repository.fork,
+        pushed_at: repository.pushed_at,
+        
+        // 設置信息
+        private: repository.private,
+        fork: repository.fork,
+        archived: repository.archived,
+        disabled: repository.disabled,
+        has_issues: repository.has_issues,
+        has_projects: repository.has_projects,
+        has_wiki: repository.has_wiki,
+        has_pages: repository.has_pages,
+        has_downloads: repository.has_downloads,
+        has_discussions: repository.has_discussions,
+        
+        // 許可證和安全
+        license: repository.license ? {
+          key: repository.license.key,
+          name: repository.license.name,
+          spdx_id: repository.license.spdx_id,
+          url: repository.license.url,
+          node_id: repository.license.node_id
+        } : null,
+        visibility: repository.visibility,
+        
+        // 所有者信息
+        owner: {
+          id: repository.owner.id,
+          node_id: repository.owner.node_id,
+          login: repository.owner.login,
+          type: repository.owner.type,
+          site_admin: repository.owner.site_admin,
+          url: repository.owner.html_url,
+          avatar_url: repository.owner.avatar_url,
+          gravatar_id: repository.owner.gravatar_id,
+          followers_url: repository.owner.followers_url,
+          following_url: repository.owner.following_url,
+          gists_url: repository.owner.gists_url,
+          starred_url: repository.owner.starred_url,
+          subscriptions_url: repository.owner.subscriptions_url,
+          organizations_url: repository.owner.organizations_url,
+          repos_url: repository.owner.repos_url,
+          events_url: repository.owner.events_url,
+          received_events_url: repository.owner.received_events_url,
         },
+        
+        // API URLs
+        api_url: repository.url,
+        archive_url: repository.archive_url,
+        assignees_url: repository.assignees_url,
+        blobs_url: repository.blobs_url,
+        branches_url: repository.branches_url,
+        collaborators_url: repository.collaborators_url,
+        comments_url: repository.comments_url,
+        commits_url: repository.commits_url,
+        compare_url: repository.compare_url,
+        contents_url: repository.contents_url,
+        contributors_url: repository.contributors_url,
+        deployments_url: repository.deployments_url,
+        downloads_url: repository.downloads_url,
+        events_url: repository.events_url,
+        forks_url: repository.forks_url,
+        git_commits_url: repository.git_commits_url,
+        git_refs_url: repository.git_refs_url,
+        git_tags_url: repository.git_tags_url,
+        hooks_url: repository.hooks_url,
+        issue_comment_url: repository.issue_comment_url,
+        issue_events_url: repository.issue_events_url,
+        issues_url: repository.issues_url,
+        keys_url: repository.keys_url,
+        labels_url: repository.labels_url,
+        languages_url: repository.languages_url,
+        merges_url: repository.merges_url,
+        milestones_url: repository.milestones_url,
+        notifications_url: repository.notifications_url,
+        pulls_url: repository.pulls_url,
+        releases_url: repository.releases_url,
+        stargazers_url: repository.stargazers_url,
+        statuses_url: repository.statuses_url,
+        subscribers_url: repository.subscribers_url,
+        subscription_url: repository.subscription_url,
+        tags_url: repository.tags_url,
+        teams_url: repository.teams_url,
+        trees_url: repository.trees_url,
+        
+        // 額外的元數據
+        allow_forking: repository.allow_forking,
+        is_template: repository.is_template,
+        web_commit_signoff_required: repository.web_commit_signoff_required,
+        delete_branch_on_merge: repository.delete_branch_on_merge,
+        use_squash_pr_title_as_default: repository.use_squash_pr_title_as_default,
+        squash_merge_commit_title: repository.squash_merge_commit_title,
+        squash_merge_commit_message: repository.squash_merge_commit_message,
+        merge_commit_title: repository.merge_commit_title,
+        merge_commit_message: repository.merge_commit_message,
+        allow_merge_commit: repository.allow_merge_commit,
+        allow_squash_merge: repository.allow_squash_merge,
+        allow_rebase_merge: repository.allow_rebase_merge,
+        allow_auto_merge: repository.allow_auto_merge,
+        allow_update_branch: repository.allow_update_branch,
+        
+        // 分數和排名（如果可用）
+        score: repository.score,
+        
+        // 爬取時間戳
+        crawled_at: new Date().toISOString()
       };
 
       // 清理數據

@@ -1,40 +1,75 @@
-name: Crawler Automation
+name: GitHub Crawler Automation
 
 on:
   schedule:
-    # 每6小時執行一次
-    - cron: '0 */6 * * *'
+    # 每2小時執行一次 (12次/天 = 4500次請求 × 12 = 54000次/天，遠低於120000次/天的限制)
+    - cron: '0 */2 * * *'
   workflow_dispatch:
     # 允許手動觸發
+    inputs:
+      max_requests:
+        description: '最大請求次數'
+        required: false
+        default: '4500'
+        type: string
 
 jobs:
   crawl:
     runs-on: ubuntu-latest
+    timeout-minutes: 30  # 設置超時時間
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
       
       - name: Install dependencies
         run: npm ci
       
+      - name: Create logs directory
+        run: mkdir -p logs
+      
       - name: Run GitHub crawler
-        run: npm run crawl:github
+        run: node src/index.js
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           GITHUB_API_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
+          MAX_REQUESTS: ${{ github.event.inputs.max_requests || '4500' }}
+          NODE_ENV: production
       
-      - name: Archive logs
+      - name: Upload CSV exports
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: crawler-logs
+          name: csv-exports-${{ github.run_number }}
+          path: exports/*.csv
+          retention-days: 30
+      
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crawler-logs-${{ github.run_number }}
           path: logs/
           retention-days: 7
+      
+      - name: Commit and push CSV files
+        if: success()
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add exports/*.csv
+          if git diff --staged --quiet; then
+            echo "No new CSV files to commit"
+          else
+            git commit -m "Auto-update: GitHub crawler data $(date +'%Y-%m-%d %H:%M:%S')"
+            git push
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

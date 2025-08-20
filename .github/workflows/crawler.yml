@@ -2,8 +2,8 @@ name: GitHub Crawler Automation
 
 on:
   schedule:
-    # 每2小時執行一次 (12次/天 = 4500次請求 × 12 = 54000次/天，遠低於120000次/天的限制)
-    - cron: '0 */2 * * *'
+    # 每天UTC時間6點執行（台灣時間下午2點）
+    - cron: '0 6 * * *'
   workflow_dispatch:
     # 允許手動觸發
     inputs:
@@ -12,6 +12,11 @@ on:
         required: false
         default: '4500'
         type: string
+
+# 設置工作流程權限
+permissions:
+  contents: write
+  actions: read
 
 jobs:
   crawl:
@@ -39,17 +44,17 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          GITHUB_API_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.AI_INFORMATION_PLATFORMAPI_TOKEN }}
           MAX_REQUESTS: ${{ github.event.inputs.max_requests || '4500' }}
           NODE_ENV: production
       
-      - name: Upload CSV exports
+      - name: Upload CSV exports as backup
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: csv-exports-${{ github.run_number }}
+          name: github-trending-data-backup-${{ github.run_number }}
           path: exports/*.csv
-          retention-days: 30
+          retention-days: 7
       
       - name: Upload logs
         if: always()
@@ -62,14 +67,22 @@ jobs:
       - name: Commit and push CSV files
         if: success()
         run: |
+          # 配置Git用戶信息
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add exports/*.csv
-          if git diff --staged --quiet; then
-            echo "No new CSV files to commit"
-          else
-            git commit -m "Auto-update: GitHub crawler data $(date +'%Y-%m-%d %H:%M:%S')"
+          
+          # 檢查是否有新的CSV文件
+          if [ -n "$(git status --porcelain exports/)" ]; then
+            # 添加所有exports目錄下的文件
+            git add exports/
+            
+            # 提交變更
+            git commit -m "🤖 自動更新GitHub趨勢數據 $(date +'%Y-%m-%d %H:%M:%S')"
+            
+            # 推送到倉庫
             git push
+            
+            echo "✅ CSV文件已成功提交到倉庫"
+          else
+            echo "ℹ️ 沒有新的CSV文件需要提交"
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

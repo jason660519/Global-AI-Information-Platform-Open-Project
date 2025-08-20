@@ -1399,7 +1399,26 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 export default main;
 ```
 
-### 12.3 GitHub Actions工作流程 (.github/workflows/crawler.yml)
+### 12.3 GitHub Actions自動化配置
+
+#### 12.3.1 權限設置
+
+在使用GitHub Actions自動提交文件之前，需要確保工作流程有適當的權限：
+
+1. **倉庫設置**
+   - 進入你的GitHub倉庫
+   - 點擊 Settings → Actions → General
+   - 在 "Workflow permissions" 部分選擇 "Read and write permissions"
+   - 勾選 "Allow GitHub Actions to create and approve pull requests"
+
+2. **Secrets配置**
+   - 進入 Settings → Secrets and variables → Actions
+   - 添加以下secrets：
+     - `GITHUB_TOKEN`：你的GitHub Personal Access Token
+     - `SUPABASE_URL`：你的Supabase項目URL
+     - `SUPABASE_KEY`：你的Supabase API密鑰
+
+#### 12.3.2 工作流程文件 (.github/workflows/crawler.yml)
 
 ```yaml
 name: GitHub爬蟲定時任務
@@ -1442,12 +1461,80 @@ jobs:
         SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
       run: npm start
       
-    - name: 上傳CSV文件
+    - name: 提交CSV文件到倉庫
+      run: |
+        # 配置Git用戶信息
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # 檢查是否有新的CSV文件
+        if [ -n "$(git status --porcelain exports/)" ]; then
+          # 添加所有exports目錄下的文件
+          git add exports/
+          
+          # 提交變更
+          git commit -m "🤖 自動更新GitHub趨勢數據 $(date +'%Y-%m-%d %H:%M:%S')"
+          
+          # 推送到倉庫
+          git push
+          
+          echo "✅ CSV文件已成功提交到倉庫"
+        else
+          echo "ℹ️ 沒有新的CSV文件需要提交"
+        fi
+        
+    - name: 上傳CSV文件作為備份
       uses: actions/upload-artifact@v4
       with:
-        name: github-trending-data
+        name: github-trending-data-backup
         path: exports/*.csv
-        retention-days: 30
+        retention-days: 7
+      if: always()
+
+#### 12.3.3 故障排除
+
+**常見問題與解決方案：**
+
+1. **權限被拒絕錯誤**
+   ```
+   remote: Permission to user/repo.git denied
+   ```
+   **解決方案：**
+   - 確保在倉庫設置中啟用了 "Read and write permissions"
+   - 檢查GITHUB_TOKEN是否正確配置
+
+2. **Git推送失敗**
+   ```
+   ! [rejected] main -> main (fetch first)
+   ```
+   **解決方案：**
+   - 在推送前添加git pull步驟
+   - 使用force push（謹慎使用）
+
+3. **CSV文件未生成**
+   **解決方案：**
+   - 檢查爬蟲執行日誌
+   - 確認API token有效
+   - 檢查網路連接
+
+4. **工作流程未觸發**
+   **解決方案：**
+   - 檢查cron表達式語法
+   - 確認工作流程文件路徑正確
+   - 手動觸發測試
+
+**調試技巧：**
+
+```yaml
+# 添加調試步驟
+- name: 調試信息
+  run: |
+    echo "當前目錄：$(pwd)"
+    echo "文件列表："
+    ls -la exports/
+    echo "Git狀態："
+    git status
+```
 ```
 
 ---

@@ -253,41 +253,148 @@ export default DataCleaner;
  */
 export function cleanRepositoryData(rawRepo) {
   try {
-    // 基本信息清理
+    // 保留所有欄位，只進行基本的數據清理和類型轉換
     const cleanedRepo = {
+      // 基本信息
+      id: rawRepo.id || null,
+      node_id: rawRepo.node_id || null,
       name: DataCleaner.normalizeText(rawRepo.name || ''),
       full_name: DataCleaner.normalizeText(rawRepo.full_name || ''),
       description: rawRepo.description ? DataCleaner.normalizeText(rawRepo.description) : null,
-      url: rawRepo.html_url || '',
+      url: rawRepo.url || '',
       homepage: rawRepo.homepage || null,
-      stars: parseInt(rawRepo.stargazers_count) || 0,
-      forks: parseInt(rawRepo.forks_count) || 0,
+      clone_url: rawRepo.clone_url || null,
+      git_url: rawRepo.git_url || null,
+      ssh_url: rawRepo.ssh_url || null,
+      svn_url: rawRepo.svn_url || null,
+      mirror_url: rawRepo.mirror_url || null,
+      
+      // 統計數據
+      stars: parseInt(rawRepo.stars) || 0,
+      forks: parseInt(rawRepo.forks) || 0,
+      watchers: parseInt(rawRepo.watchers) || 0,
+      subscribers_count: parseInt(rawRepo.subscribers_count) || 0,
+      network_count: parseInt(rawRepo.network_count) || 0,
+      open_issues: parseInt(rawRepo.open_issues) || 0,
+      size: parseInt(rawRepo.size) || 0,
+      
+      // 技術信息
       language: rawRepo.language || null,
       topics: Array.isArray(rawRepo.topics)
         ? rawRepo.topics.filter(topic => topic && typeof topic === 'string')
         : [],
-      owner: {
-        login: rawRepo.owner?.login || '',
-        type: rawRepo.owner?.type || 'User',
-        url: rawRepo.owner?.html_url || '',
-      },
+      default_branch: rawRepo.default_branch || 'main',
+      
+      // 時間信息
       created_at: rawRepo.created_at || new Date().toISOString(),
       updated_at: rawRepo.updated_at || new Date().toISOString(),
+      pushed_at: rawRepo.pushed_at || null,
+      
+      // 設置信息
+      private: Boolean(rawRepo.private),
+      fork: Boolean(rawRepo.fork),
+      archived: Boolean(rawRepo.archived),
+      disabled: Boolean(rawRepo.disabled),
+      has_issues: Boolean(rawRepo.has_issues),
+      has_projects: Boolean(rawRepo.has_projects),
+      has_wiki: Boolean(rawRepo.has_wiki),
+      has_pages: Boolean(rawRepo.has_pages),
+      has_downloads: Boolean(rawRepo.has_downloads),
+      has_discussions: Boolean(rawRepo.has_discussions),
+      
+      // 許可證信息
       license: rawRepo.license
         ? {
             key: rawRepo.license.key || null,
             name: rawRepo.license.name || null,
             spdx_id: rawRepo.license.spdx_id || null,
             url: rawRepo.license.url || null,
+            node_id: rawRepo.license.node_id || null
           }
         : null,
-      metadata: {
-        api_url: rawRepo.url || '',
-        open_issues: parseInt(rawRepo.open_issues_count) || 0,
-        watchers: parseInt(rawRepo.watchers_count) || 0,
-        default_branch: rawRepo.default_branch || 'main',
-        is_fork: Boolean(rawRepo.fork),
-      },
+      visibility: rawRepo.visibility || null,
+      
+      // 所有者信息
+      owner: rawRepo.owner ? {
+        id: rawRepo.owner.id || null,
+        node_id: rawRepo.owner.node_id || null,
+        login: rawRepo.owner.login || '',
+        type: rawRepo.owner.type || 'User',
+        site_admin: Boolean(rawRepo.owner.site_admin),
+        url: rawRepo.owner.url || '',
+        avatar_url: rawRepo.owner.avatar_url || null,
+        gravatar_id: rawRepo.owner.gravatar_id || null,
+        followers_url: rawRepo.owner.followers_url || null,
+        following_url: rawRepo.owner.following_url || null,
+        gists_url: rawRepo.owner.gists_url || null,
+        starred_url: rawRepo.owner.starred_url || null,
+        subscriptions_url: rawRepo.owner.subscriptions_url || null,
+        organizations_url: rawRepo.owner.organizations_url || null,
+        repos_url: rawRepo.owner.repos_url || null,
+        events_url: rawRepo.owner.events_url || null,
+        received_events_url: rawRepo.owner.received_events_url || null,
+      } : null,
+      
+      // API URLs
+      api_url: rawRepo.api_url || null,
+      archive_url: rawRepo.archive_url || null,
+      assignees_url: rawRepo.assignees_url || null,
+      blobs_url: rawRepo.blobs_url || null,
+      branches_url: rawRepo.branches_url || null,
+      collaborators_url: rawRepo.collaborators_url || null,
+      comments_url: rawRepo.comments_url || null,
+      commits_url: rawRepo.commits_url || null,
+      compare_url: rawRepo.compare_url || null,
+      contents_url: rawRepo.contents_url || null,
+      contributors_url: rawRepo.contributors_url || null,
+      deployments_url: rawRepo.deployments_url || null,
+      downloads_url: rawRepo.downloads_url || null,
+      events_url: rawRepo.events_url || null,
+      forks_url: rawRepo.forks_url || null,
+      git_commits_url: rawRepo.git_commits_url || null,
+      git_refs_url: rawRepo.git_refs_url || null,
+      git_tags_url: rawRepo.git_tags_url || null,
+      hooks_url: rawRepo.hooks_url || null,
+      issue_comment_url: rawRepo.issue_comment_url || null,
+      issue_events_url: rawRepo.issue_events_url || null,
+      issues_url: rawRepo.issues_url || null,
+      keys_url: rawRepo.keys_url || null,
+      labels_url: rawRepo.labels_url || null,
+      languages_url: rawRepo.languages_url || null,
+      merges_url: rawRepo.merges_url || null,
+      milestones_url: rawRepo.milestones_url || null,
+      notifications_url: rawRepo.notifications_url || null,
+      pulls_url: rawRepo.pulls_url || null,
+      releases_url: rawRepo.releases_url || null,
+      stargazers_url: rawRepo.stargazers_url || null,
+      statuses_url: rawRepo.statuses_url || null,
+      subscribers_url: rawRepo.subscribers_url || null,
+      subscription_url: rawRepo.subscription_url || null,
+      tags_url: rawRepo.tags_url || null,
+      teams_url: rawRepo.teams_url || null,
+      trees_url: rawRepo.trees_url || null,
+      
+      // 額外的元數據
+      allow_forking: Boolean(rawRepo.allow_forking),
+      is_template: Boolean(rawRepo.is_template),
+      web_commit_signoff_required: Boolean(rawRepo.web_commit_signoff_required),
+      delete_branch_on_merge: Boolean(rawRepo.delete_branch_on_merge),
+      use_squash_pr_title_as_default: Boolean(rawRepo.use_squash_pr_title_as_default),
+      squash_merge_commit_title: rawRepo.squash_merge_commit_title || null,
+      squash_merge_commit_message: rawRepo.squash_merge_commit_message || null,
+      merge_commit_title: rawRepo.merge_commit_title || null,
+      merge_commit_message: rawRepo.merge_commit_message || null,
+      allow_merge_commit: Boolean(rawRepo.allow_merge_commit),
+      allow_squash_merge: Boolean(rawRepo.allow_squash_merge),
+      allow_rebase_merge: Boolean(rawRepo.allow_rebase_merge),
+      allow_auto_merge: Boolean(rawRepo.allow_auto_merge),
+      allow_update_branch: Boolean(rawRepo.allow_update_branch),
+      
+      // 分數和排名
+      score: parseFloat(rawRepo.score) || 0,
+      
+      // 爬取時間戳
+      crawled_at: rawRepo.crawled_at || new Date().toISOString()
     };
 
     // 清理描述中的HTML標籤（如果有）

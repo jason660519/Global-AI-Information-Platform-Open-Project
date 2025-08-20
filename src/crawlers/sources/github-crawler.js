@@ -611,8 +611,19 @@ class GitHubCrawler extends APICrawler {
     try {
       logger.info('開始執行GitHub爬蟲');
 
+      // 在GitHub Actions環境中啟用Supabase上傳
+      const isGitHubActions = process.env.GITHUB_ACTIONS === 'true';
+      const crawlOptions = {
+        exportCSV: true,
+        uploadToSupabase: isGitHubActions, // 在GitHub Actions中啟用Supabase上傳
+        maxResults: 50,
+        minStars: 10
+      };
+
+      logger.info(`爬蟲選項: ${JSON.stringify(crawlOptions)}`);
+
       const results = {
-        trending: await this.crawlTrendingRepositories(),
+        trending: await this.crawlTrendingRepositories(crawlOptions),
         topics: await this.crawlAllTopics(),
       };
 

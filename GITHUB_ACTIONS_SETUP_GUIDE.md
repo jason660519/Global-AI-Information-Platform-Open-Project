@@ -1,5 +1,49 @@
 # GitHub Actions 自動化配置指南
 
+## 重要：更新 GitHub Secrets 中的 SUPABASE_KEY
+
+### 為什麼需要更新？
+當您在 Supabase 中遇到 "row-level security policy" 錯誤時，需要使用 **SERVICE ROLE key** 而不是 **Anon Key** 來進行資料庫操作。SERVICE ROLE key 具有管理員權限，可以繞過 RLS（行級安全策略）限制。
+
+### 步驟 1：獲取 SERVICE ROLE Key
+
+1. 打開瀏覽器，前往 [Supabase Dashboard](https://supabase.com/dashboard)
+2. 選擇您的專案
+3. 點選左側選單的 **"Settings"**
+4. 在 Settings 頁面中，點選 **"API"**
+5. 在 API 頁面中，找到 **"Project API keys"** 區域
+6. 複製 **"service_role"** 的 secret key（注意：這是一個很長的字串，以 `eyJ` 開頭）
+
+⚠️ **重要提醒**：SERVICE ROLE key 具有完整的資料庫存取權限，請妥善保管，不要在程式碼中直接使用。
+
+### 步驟 2：在 GitHub 中更新 Secret
+
+1. 打開瀏覽器，前往您的 GitHub Repository 頁面
+2. 點選頁面上方的 **"Settings"** 標籤
+3. 在左側選單中找到 **"Secrets and variables"**
+4. 點選 **"Actions"**
+5. 在 Repository secrets 列表中找到 **"SUPABASE_KEY"**
+6. 點選 SUPABASE_KEY 右側的 **"Update"** 按鈕
+7. 在 **"Secret"** 欄位中，貼上剛才從 Supabase 複製的 SERVICE ROLE key
+8. 點選 **"Update secret"** 按鈕確認
+
+### 步驟 3：重新執行 GitHub Actions
+
+1. 在您的 GitHub Repository 中，點選 **"Actions"** 標籤
+2. 找到最近的 workflow run
+3. 點選 **"Re-run all jobs"** 按鈕重新執行
+
+或者，您也可以推送新的 commit 來觸發新的 workflow 執行。
+
+### 驗證步驟
+
+執行完成後，檢查以下項目：
+- GitHub Actions 執行狀態應該顯示綠色（成功）
+- 在 Supabase 的 **"GITHUB REPO API"** 表格中應該能看到新的資料
+- 不再出現 "row-level security policy" 錯誤訊息
+
+---
+
 ## 概述
 
 本指南將幫助你設置GitHub Actions自動化工作流程，讓GitHub爬蟲系統能夠定期執行並自動將爬取的CSV文件提交到倉庫。

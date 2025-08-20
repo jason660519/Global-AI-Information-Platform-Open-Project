@@ -242,7 +242,7 @@ class SupabaseUploader {
   async testConnection() {
     try {
       const { data, error } = await this.supabase
-        .from('repositories')
+        .from(config.supabase.tables.repositories)
         .select('count', { count: 'exact', head: true });
 
       if (error) {

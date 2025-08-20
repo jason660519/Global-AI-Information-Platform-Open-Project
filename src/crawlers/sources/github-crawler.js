@@ -190,7 +190,7 @@ class GitHubCrawler extends APICrawler {
         if (uploadToSupabase) {
           logger.info('開始Supabase上傳');
           try {
-            uploadResults = await this.supabaseUploader.uploadRepositories(processedRepositories);
+            uploadResults = await this.supabaseUploader.uploadRepositories(processedRepositories, config.supabase.tables.repositories);
             logger.info(
               `數據已上傳到Supabase: 成功 ${uploadResults.successful}, 失敗 ${uploadResults.failed}`
             );

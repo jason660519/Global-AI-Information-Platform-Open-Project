@@ -11,7 +11,7 @@ const config = {
       processingBucket: 'processing-data',
     },
     tables: {
-      repositories: 'repositories',
+      repositories: 'GITHUB REPO API',
       news: 'news',
       resources: 'learning_resources',
       rankings: 'rankings',

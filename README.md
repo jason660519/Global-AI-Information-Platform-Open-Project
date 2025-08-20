@@ -142,7 +142,20 @@ npm run crawl
 
 # 僅執行GitHub爬蟲
 npm run crawl:github
+
+# GitHub Actions 故障排除
+npm run diagnose
 ```
+
+### GitHub Actions 故障排除
+
+如果您的 GitHub Actions 沒有自動執行，請使用診斷工具：
+
+```bash
+npm run diagnose
+```
+
+詳細的故障排除指南請參考：[GITHUB_ACTIONS_TROUBLESHOOTING.md](./GITHUB_ACTIONS_TROUBLESHOOTING.md)
 
 ### 4. 架構圖表
 

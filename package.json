@@ -24,7 +24,8 @@
     "format": "prettier --write src/**/*.js",
     "format:check": "prettier --check src/**/*.js",
     "export:csv": "node src/exporters/csv-exporter.js",
-    "upload:supabase": "node src/uploaders/supabase-uploader.js"
+    "upload:supabase": "node src/uploaders/supabase-uploader.js",
+    "diagnose": "node diagnose-github-actions.cjs"
   },
   "keywords": [
     "ai",

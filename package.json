@@ -1,7 +1,7 @@
 {
-  "name": "global-ai-info-platform",
+  "name": "github-repos-platform",
   "version": "1.0.0",
-  "description": "A comprehensive platform for aggregating and analyzing global AI information",
+  "description": "GitHub 倉庫信息平台 - 本地 PostgreSQL 開發版本",
   "main": "src/index.js",
   "type": "module",
   "engines": {
@@ -10,18 +10,27 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build": "cd frontend && npm run build",
     "crawl": "node src/crawlers/index.js",
     "crawl:github": "node src/crawlers/sources/github-crawler.js",
     "crawl:actions": "node src/index.js",
-    "test:actions": "node test-github-actions.js",
+    "clean:data": "node scripts/data-cleaner.js",
+    "import:data": "node scripts/data-importer.js",
+    "backup:db": "node scripts/backup.js",
+    "setup:db": "node database/setup.js",
+    "migrate:db": "cd backend && npx knex migrate:latest",
+    "seed:db": "cd backend && npx knex seed:run",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "lint": "eslint src/**/*.js",
+    "test:actions": "node test-github-actions.js",
+    "lint": "eslint . --ext .js,.jsx",
     "lint:fix": "eslint src/**/*.js --fix",
-    "format": "prettier --write src/**/*.js",
+    "format": "prettier --write .",
     "format:check": "prettier --check src/**/*.js",
     "export:csv": "node src/exporters/csv-exporter.js",
     "upload:supabase": "node src/uploaders/supabase-uploader.js",
@@ -29,7 +38,7 @@
     "clean:exports": "rimraf exports/*.csv",
     "clean:logs": "rimraf logs/*.log",
     "clean:all": "npm run clean:exports && npm run clean:logs",
-    "validate:env": "node -e \"console.log('Environment validation:', process.env.GITHUB_TOKEN ? '✅ GITHUB_TOKEN' : '❌ GITHUB_TOKEN missing', process.env.SUPABASE_URL ? '✅ SUPABASE_URL' : '❌ SUPABASE_URL missing', process.env.SUPABASE_KEY ? '✅ SUPABASE_KEY' : '❌ SUPABASE_KEY missing')\"",
+    "validate:env": "node -e \"console.log('Environment validation:', process.env.GITHUB_TOKEN ? '✅ GITHUB_TOKEN' : '❌ GITHUB_TOKEN missing', process.env.DATABASE_URL ? '✅ DATABASE_URL' : '❌ DATABASE_URL missing')\"",
     "ci": "npm run lint && npm run format:check && npm run test",
     "prestart": "npm run validate:env",
     "poststart": "echo \"Crawler execution completed. Check exports/ directory for CSV files.\""
@@ -56,7 +65,12 @@
     "joi": "^17.12.0",
     "lodash": "^4.17.21",
     "node-cron": "^3.0.3",
-    "winston": "^3.11.0"
+    "winston": "^3.11.0",
+    "pg": "^8.11.3",
+    "knex": "^3.1.0",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "fs-extra": "^11.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
@@ -68,6 +82,7 @@
     "nodemon": "^3.0.3",
     "prettier": "^3.6.2",
     "rimraf": "^5.0.5",
-    "supertest": "^6.3.4"
+    "supertest": "^6.3.4",
+    "concurrently": "^8.2.2"
   }
 }

@@ -88,17 +88,16 @@ class SupabaseUploader {
       };
 
       // 只返回數據庫中確實存在的基本字段
+      // 根據用戶的 Supabase 表格結構調整欄位映射
       return {
-        name: rawData.Name || rawData.name || '',
-        full_name: rawData['Full Name'] || rawData.full_name || '',
-        description: rawData.Description || rawData.description || null,
-        url: rawData.URL || rawData.url || '',
-        stars: parseNumber(rawData.Stars || rawData.stars),
-        forks: parseNumber(rawData.Forks || rawData.forks),
-        language: rawData.Language || rawData.language || null,
-        created_at: rawData['Created At'] || rawData.created_at || null,
-        updated_at: rawData['Updated At'] || rawData.updated_at || null,
-        crawled_at: new Date().toISOString(),
+        'Name': rawData.Name || rawData.name || '',
+        'Full Name': rawData['Full Name'] || rawData.full_name || '',
+        'Description': rawData.Description || rawData.description || null,
+        'HTML URL': rawData['HTML URL'] || rawData.url || '',
+        'Stars': parseNumber(rawData.Stars || rawData.stars),
+        'Forks': parseNumber(rawData.Forks || rawData.forks),
+        'Language': rawData.Language || rawData.language || null,
+        'Topics': parseTopics(rawData.Topics || rawData.topics || ''),
       };
     } catch (error) {
       logger.error('Error cleaning repository data:', error, rawData);
@@ -135,10 +134,7 @@ class SupabaseUploader {
 
         const { data: insertedData, error } = await this.supabase
           .from(tableName)
-          .upsert(batch, {
-            onConflict: 'id',
-            ignoreDuplicates: false,
-          })
+          .insert(batch)
           .select();
 
         if (error) {
@@ -237,24 +233,25 @@ class SupabaseUploader {
 
   /**
    * 檢查Supabase連接
-   * @returns {Promise<boolean>} 連接狀態
+   * @param {string} tableName - 要測試的表名
+   * @returns {Promise<Object>} 連接狀態和錯誤信息
    */
-  async testConnection() {
+  async testConnection(tableName = 'GITHUB REPO EVERY 2 HOUR') {
     try {
       const { data, error } = await this.supabase
-        .from(config.supabase.tables.repositories)
+        .from(tableName)
         .select('count', { count: 'exact', head: true });
 
       if (error) {
         logger.error('Supabase connection test failed:', error);
-        return false;
+        return { success: false, error: error.message };
       }
 
       logger.info('Supabase connection test successful');
-      return true;
+      return { success: true };
     } catch (error) {
       logger.error('Supabase connection test error:', error);
-      return false;
+      return { success: false, error: error.message };
     }
   }
 
@@ -348,3 +345,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   testUpload();
 }
+
+export { SupabaseUploader };

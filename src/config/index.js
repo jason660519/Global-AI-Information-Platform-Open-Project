@@ -5,13 +5,13 @@ const config = {
   // Supabase配置
   supabase: {
     url: process.env.SUPABASE_URL,
-    key: process.env.SUPABASE_KEY,
+    key: process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY,
     storage: {
       rawDataBucket: 'raw-data',
       processingBucket: 'processing-data',
     },
     tables: {
-      repositories: 'GITHUB REPO API',
+      repositories: 'GITHUB REPO EVERY 2 HOUR',
       news: 'news',
       resources: 'learning_resources',
       rankings: 'rankings',

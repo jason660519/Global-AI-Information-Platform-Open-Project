@@ -39,7 +39,7 @@
 
 執行完成後，檢查以下項目：
 - GitHub Actions 執行狀態應該顯示綠色（成功）
-- 在 Supabase 的 **"GITHUB REPO API"** 表格中應該能看到新的資料
+- 在 Supabase 的 **"GITHUB REPO EVERY 2 HOUR"** 表格中應該能看到新的資料
 - 不再出現 "row-level security policy" 錯誤訊息
 
 ---

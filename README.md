@@ -1,78 +1,70 @@
-# Global AI Information Platform Open Project (SoftHub)
+# GitHub 倉庫信息平台
+
+一個基於 PostgreSQL 的 GitHub 倉庫信息展示和分析平台，提供倉庫搜索、統計分析和趨勢展示功能。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Next.js](https://img.shields.io/badge/Next.js-13.0+-black.svg)](https://nextjs.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-Latest-green.svg)](https://supabase.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18.0+-green.svg)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue.svg)](https://postgresql.org/)
+[![React](https://img.shields.io/badge/React-18.0+-blue.svg)](https://reactjs.org/)
 
-## 專案概述
+## 🚀 功能特色
 
-**SoftHub** 是一個多語言、使用者友善的全球軟硬體互動資訊與學習平台。此平台旨在讓普通用戶、技術愛好者及專業開發者能夠輕鬆地發現、評價、比較及交流各種軟硬體產品的使用心得與學習經驗。
-
-## 🌟 核心特色
-
-- **內容聚合與發現**：聚合來自全球頂尖來源的軟硬體資訊、開源專案及 IT 新聞
-- **社群互動與評價**：提供中立的平台，讓用戶發表評論、評分，並圍繞特定產品或技術進行討論
-- **輕量化託管**：初期僅託管文字、圖片及外部影片連結，降低複雜度和維護成本
-- **全球化與親民化**：支援多語言（優先支援中文、英文、日文），採用直觀、簡潔的 UI/UX 設計
+- **倉庫瀏覽**: 瀏覽和搜索 GitHub 倉庫
+- **詳細信息**: 查看倉庫詳細信息、語言分佈、主題標籤
+- **擁有者信息**: 查看開發者和組織的詳細資料
+- **統計分析**: 語言統計、趨勢分析、分佈圖表
+- **高級搜索**: 支援多條件篩選和排序
+- **響應式設計**: 支援桌面和移動設備
 
 ## 🏗️ 技術架構
 
-### 前端技術
+### 後端
+- **Node.js** + **Express.js** - API 服務
+- **PostgreSQL** - 主要資料庫
+- **Knex.js** - 資料庫查詢建構器
+- **Winston** - 日誌管理
 
-- **框架**：Next.js 13+ (App Router)
-- **語言**：TypeScript
-- **樣式**：Tailwind CSS + Ant Design + Radix UI
-- **狀態管理**：Zustand + React Query
-- **國際化**：React-i18next
+### 前端
+- **React 18** - 用戶界面
+- **Vite** - 建構工具
+- **Tailwind CSS** - 樣式框架
+- **React Query** - 數據獲取和緩存
+- **React Router** - 路由管理
 
-### 後端技術
-
-- **平台**：Supabase (PostgreSQL + Auth + Storage)
-- **API**：Next.js API Routes + Server Actions
-- **認證**：Supabase Auth
-- **快取**：Redis
-
-### 爬蟲技術
-
-- **引擎**：Playwright, Puppeteer, Cheerio
-- **調度**：GitHub Actions
-- **容器化**：Docker
-- **監控**：自建監控系統
+### 開發工具
+- **ESLint** + **Prettier** - 代碼規範
+- **Vitest** - 測試框架
+- **Concurrently** - 並行運行腳本
 
 ## 📁 專案結構
 
 ```
-Global AI Information Platform Open Project/
-├── 📄 全球軟體資訊平台專案規格書.mdx     # 主要專案規格書 (PRD)
-├── 📄 各工程師及其專業細項.mdx          # 工程師專業分類與技能詳解
-├── 📄 資料來源與爬取策略.mdx            # 數據來源與爬取技術方案
-├── 📄 爬取策略.mdx                     # 爬取策略實施方案
-├── 📊 系統架構圖2.png                  # 系統整體架構圖
-├── 📊 爬蟲運作流程.png                  # 爬蟲運作流程圖
-├── 📊 組件分配原則.png                  # 組件分配原則圖
-├── 📊 推薦系統架構.png                  # 推薦系統架構圖
-├── 📊 組件結構樹.png                    # 組件結構樹狀圖
-├── 📊 測試流程架構圖.png                # 測試流程架構圖
-├── 📊 數據爬取方法與流程.png            # 數據爬取流程圖
-├── 📊 項目文件結構.png                  # 項目文件結構圖
-├── 📊 內容推薦引擎.png                  # 內容推薦引擎圖
-├── 📊 圖片優化方案.png                  # 圖片優化方案圖
-├── 📊 網頁運作流程圖.png                # 網頁運作流程圖
-├── 📁 .github/                        # GitHub Actions 配置
-├── 📁 src/                            # 爬蟲系統源代碼
-│   ├── 📁 config/                     # 配置文件
-│   ├── 📁 crawlers/                   # 爬蟲實現
-│   │   ├── 📁 engines/                # 爬蟲引擎
-│   │   └── 📁 sources/                # 數據源爬蟲
-│   ├── 📁 data/                       # 數據處理
-│   │   ├── 📁 processors/             # 數據處理器
-│   │   └── 📁 validators/             # 數據驗證器
-│   ├── 📁 database/                   # 數據庫操作
-│   └── 📁 utils/                      # 工具函數
-│       ├── 📁 errors/                 # 錯誤處理
-│       └── 📁 logger/                 # 日誌系統
-└── 📄 README.md                        # 專案說明文檔
+├── backend/                 # 後端 API 服務
+│   ├── src/
+│   │   ├── config/         # 配置文件
+│   │   ├── routes/         # API 路由
+│   │   └── server.js       # 服務器入口
+│   ├── migrations/         # 資料庫遷移
+│   ├── seeds/             # 種子數據
+│   └── package.json
+├── frontend/               # 前端 React 應用
+│   ├── src/
+│   │   ├── components/     # React 組件
+│   │   ├── pages/         # 頁面組件
+│   │   ├── hooks/         # 自定義 Hooks
+│   │   ├── services/      # API 服務
+│   │   └── styles/        # 樣式文件
+│   └── package.json
+├── database/               # 資料庫相關
+│   ├── schema.sql         # 資料庫結構
+│   └── setup.js           # 資料庫設置腳本
+├── scripts/                # 工具腳本
+│   ├── data-cleaner.js    # 數據清洗
+│   └── data-importer.js   # 數據導入
+├── data/                   # 數據文件
+│   ├── raw/               # 原始 CSV 數據
+│   └── processed/         # 處理後的數據
+└── docs/                   # 文檔
 ```
 
 ## 📚 文檔導航
@@ -169,10 +161,11 @@ npm run diagnose
 
 ### 環境要求
 
-- Node.js 18+
-- npm 或 yarn
-- Git
-- Docker (可選)
+- **Node.js** 18+
+- **PostgreSQL** 12+
+- **npm** 或 **yarn**
+- **Git**
+- **Docker** (可選)
 
 ### 安裝步驟
 
@@ -184,17 +177,37 @@ cd Global-AI-Information-Platform-Open-Project
 # 2. 安裝依賴
 npm install
 
-# 3. 配置環境變數
+# 3. 設置後端依賴
+cd backend
+npm install
+
+# 4. 設置前端依賴
+cd ../frontend
+npm install
+
+# 5. 配置環境變數
 cp .env.example .env.local
 # 編輯 .env.local 文件，填入必要的環境變數
 
-# 4. 啟動開發服務器
+# 6. 設置資料庫
+createdb github_repos_platform
+cd ../backend
+npm run migrate
+
+# 7. 啟動開發服務器
 npm run dev
 ```
 
 ### 環境變數配置
 
 ```bash
+# 資料庫配置
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=github_repos_platform
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+
 # Supabase 配置
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -204,9 +217,77 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 CRAWLER_GITHUB_TOKEN=your_github_token
 CRAWLER_OPENAI_API_KEY=your_openai_api_key
 
+# 服務器配置
+PORT=3001
+FRONTEND_URL=http://localhost:3000
+
 # 其他配置
 NEXTAUTH_SECRET=your_nextauth_secret
 NEXTAUTH_URL=http://localhost:3000
+```
+
+## 🏃‍♂️ 運行專案
+
+### 開發模式
+
+```bash
+# 啟動後端服務
+cd backend
+npm run dev
+# 後端服務將在 http://localhost:3001 運行
+
+# 啟動前端服務 (新終端)
+cd frontend
+npm run dev
+# 前端應用將在 http://localhost:3000 運行
+
+# 或同時啟動前後端 (在專案根目錄)
+npm run dev
+```
+
+### 生產模式
+
+```bash
+# 建構前端
+cd frontend
+npm run build
+
+# 啟動後端
+cd ../backend
+npm start
+```
+
+## 📊 數據管理
+
+### 數據清洗
+
+```bash
+# 清洗原始 CSV 數據
+node scripts/data-cleaner.js
+```
+
+### 數據導入
+
+```bash
+# 將清洗後的數據導入資料庫
+node scripts/data-importer.js
+```
+
+### 資料庫管理
+
+```bash
+# 創建新的遷移
+cd backend
+npm run migrate:make migration_name
+
+# 運行遷移
+npm run migrate
+
+# 回滾遷移
+npm run migrate:rollback
+
+# 填充種子數據
+npm run seed
 ```
 
 ## 🔧 開發指南
@@ -242,6 +323,116 @@ chore:    構建過程或輔助工具的變動
 - `feature/*`: 功能分支，用於開發新功能
 - `hotfix/*`: 熱修復分支，用於緊急修復
 
+## 📚 API 文檔
+
+### 基礎 URL
+
+```
+http://localhost:3001/api
+```
+
+### 主要端點
+
+#### 倉庫相關
+
+```http
+# 獲取倉庫列表
+GET /api/repositories
+
+# 獲取單個倉庫詳情
+GET /api/repositories/:id
+
+# 獲取趨勢倉庫
+GET /api/repositories/trending
+```
+
+**查詢參數：**
+- `page`: 頁碼 (默認: 1)
+- `limit`: 每頁數量 (默認: 20)
+- `sort`: 排序方式 (stars, forks, updated_at)
+- `language`: 程式語言篩選
+- `min_stars`: 最小星數
+- `owner_type`: 擁有者類型 (user, organization)
+
+#### 擁有者相關
+
+```http
+# 獲取擁有者列表
+GET /api/owners
+
+# 獲取單個擁有者詳情
+GET /api/owners/:id
+
+# 獲取擁有者的倉庫
+GET /api/owners/:id/repositories
+
+# 獲取頂級擁有者
+GET /api/owners/top
+```
+
+#### 統計相關
+
+```http
+# 獲取總體統計
+GET /api/stats/overview
+
+# 獲取語言統計
+GET /api/stats/languages
+
+# 獲取主題統計
+GET /api/stats/topics
+
+# 獲取趨勢統計
+GET /api/stats/trends
+
+# 獲取分佈統計
+GET /api/stats/distribution
+```
+
+#### 搜索相關
+
+```http
+# 搜索倉庫
+GET /api/search/repositories
+
+# 搜索擁有者
+GET /api/search/owners
+
+# 獲取搜索建議
+GET /api/search/suggestions
+
+# 自動完成
+GET /api/search/autocomplete
+```
+
+**響應示例：**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "react",
+      "full_name": "facebook/react",
+      "description": "A declarative, efficient, and flexible JavaScript library for building user interfaces.",
+      "stars_count": 185000,
+      "forks_count": 38000,
+      "primary_language": "JavaScript",
+      "topics": ["react", "javascript", "library"],
+      "created_at": "2013-05-24T16:15:54Z",
+      "updated_at": "2023-12-01T10:30:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1000,
+    "total_pages": 50
+  }
+}
+```
+
 ## 🧪 測試
 
 ### 測試類型
@@ -254,7 +445,12 @@ chore:    構建過程或輔助工具的變動
 ### 運行測試
 
 ```bash
-# 運行所有測試
+# 後端測試
+cd backend
+npm test
+
+# 前端測試
+cd frontend
 npm test
 
 # 運行測試並監聽變化
@@ -264,6 +460,12 @@ npm run test:watch
 npm run test:e2e
 
 # 生成測試覆蓋率報告
+# 後端覆蓋率
+cd backend
+npm run test:coverage
+
+# 前端覆蓋率
+cd frontend
 npm run test:coverage
 ```
 
